@@ -160,6 +160,7 @@ def pdflookup(pdf, allresults, outformat, startpage=None):
 def _get_bib_element(bibitem, element):
     """Return element from bibitem or None."""
     lst = [i.strip() for i in bibitem.split("\n")]
+    print lst
     for i in lst:
         if i.startswith(element):
             value = i.split("=", 1)[-1]
@@ -172,15 +173,16 @@ def _get_bib_element(bibitem, element):
     return None
 
 
-def rename_file(pdf, bibitem):
+def rename_file(pdf, bibitem, check=True):
     """Attempt to rename pdf according to bibitem."""
     year = _get_bib_element(bibitem, "year")
     author = _get_bib_element(bibitem, "author")
+    journal = _get_bib_element(bibitem, "journal")
     if author:
         author = author.split(",")[0]
     title = _get_bib_element(bibitem, "title")
-    l = [i for i in (year, author, title) if i]
-    filename = "-".join(l) + ".pdf"
+    l = [i for i in (author, journal.title(), year, title.title()) if i]
+    filename = os.path.join(year,author,"_".join(l) + ".pdf")
     newfile = pdf.replace(os.path.basename(pdf), filename)
     print()
     print("Will rename:")
@@ -191,14 +193,16 @@ def rename_file(pdf, bibitem):
     print()
     print("  %s" % newfile)
     print()
-    print("Proceed? [y/N]")
-    answer = input()
-    if answer == 'y':
-        print("Renaming %s to %s" % (pdf, newfile))
-        os.rename(pdf, newfile)
+    if check:
+        print("Proceed? [y/N]: ")
+        answer = raw_input()
+        if answer == 'y':
+            print("Renaming %s to %s" % (pdf, newfile))
+            os.renames(pdf, newfile)
+        else:
+            print("Aborting.")
     else:
-        print("Aborting.")
-
+        os.renames(pdf, newfile)
 
 if __name__ == "__main__":
     usage = 'Usage: %prog [options] {pdf | "search terms"}'
