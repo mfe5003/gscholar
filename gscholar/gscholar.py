@@ -49,7 +49,10 @@ import os
 import subprocess
 import optparse
 import logging
+from unidecode import unidecode
 
+dest_path = "/home/ebert/Dropbox/Papers/"
+unsorted_path = "/home/ebert/Dropbox/Papers/unsorted"
 
 # fake google id (looks like it is a 16 elements hex)
 rand_str = str(random.random()).encode('utf8')
@@ -160,7 +163,6 @@ def pdflookup(pdf, allresults, outformat, startpage=None):
 def _get_bib_element(bibitem, element):
     """Return element from bibitem or None."""
     lst = [i.strip() for i in bibitem.split("\n")]
-    print lst
     for i in lst:
         if i.startswith(element):
             value = i.split("=", 1)[-1]
@@ -174,35 +176,43 @@ def _get_bib_element(bibitem, element):
 
 
 def rename_file(pdf, bibitem, check=True):
+    bibitem = bibitem.strip()
     """Attempt to rename pdf according to bibitem."""
     year = _get_bib_element(bibitem, "year")
     author = _get_bib_element(bibitem, "author")
     journal = _get_bib_element(bibitem, "journal")
     if author:
         author = author.split(",")[0]
+        for (old, new) in re.findall("(\{[^a-zA-Z]*([a-zA-z])\})", author):
+            author = author.replace(old, new)
+
     title = _get_bib_element(bibitem, "title")
+
     l = [i for i in (author, journal.title(), year, title.title()) if i]
-    filename = os.path.join(year,author,"_".join(l) + ".pdf")
-    newfile = pdf.replace(os.path.basename(pdf), filename)
-    print()
-    print("Will rename:")
-    print()
-    print("  %s" % pdf)
-    print()
-    print("to")
-    print()
-    print("  %s" % newfile)
-    print()
+    if None in l:# if any entries are null then file it away
+        filename = os.path.join(unsorted_path, os.path.basename(pdf))
+    else:# otherwise we're good
+        filename = os.path.join(dest_path,year,author,"_".join(l) + ".pdf")
+
+    print("\nWill rename:\n")
+    print("  %s\n" % pdf)
+    print("to\n")
+    print("  %s\n" % filename)
     if check:
         print("Proceed? [y/N]: ")
         answer = raw_input()
         if answer == 'y':
-            print("Renaming %s to %s" % (pdf, newfile))
-            os.renames(pdf, newfile)
+            os.renames(pdf, filename)
         else:
             print("Aborting.")
     else:
-        os.renames(pdf, newfile)
+        os.renames(pdf, filename)
+
+    bibitem = ''.join(map( unidecode, bibitem ))
+    bi = bibitem.rsplit('\n',1)
+    bibitem = bi[0] + (',\n  File={:%s:PDF}\n' % filename) + bi[1]
+    print bibitem
+    return (bibitem)
 
 if __name__ == "__main__":
     usage = 'Usage: %prog [options] {pdf | "search terms"}'
