@@ -187,12 +187,11 @@ def rename_file(pdf, bibitem, check=True):
             author = author.replace(old, new)
 
     title = _get_bib_element(bibitem, "title")
-
-    l = [i for i in (author, journal.title(), year, title.title()) if i]
-    if None in l:# if any entries are null then file it away
-        filename = os.path.join(unsorted_path, os.path.basename(pdf))
-    else:# otherwise we're good
+    try:
+        l = [i for i in (author, journal.title(), year, title.title()) if i]
         filename = os.path.join(dest_path,year,author,"_".join(l) + ".pdf")
+    except AttributeError:# were missing a field, put in unsorted folder
+        filename = os.path.join(unsorted_path, os.path.basename(pdf))
 
     print("\nWill rename:\n")
     print("  %s\n" % pdf)
@@ -211,8 +210,8 @@ def rename_file(pdf, bibitem, check=True):
     bibitem = ''.join(map( unidecode, bibitem ))
     bi = bibitem.rsplit('\n',1)
     bibitem = bi[0] + (',\n  File={:%s:PDF}\n' % filename) + bi[1]
-    print bibitem
-    return (bibitem)
+    #print bibitem
+    return {"bib":bibitem, "file":filename}
 
 if __name__ == "__main__":
     usage = 'Usage: %prog [options] {pdf | "search terms"}'
