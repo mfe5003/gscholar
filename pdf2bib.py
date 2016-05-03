@@ -32,4 +32,6 @@ for pdf in pdfs:
     print "\n============================="
     print pdf
     enterfile(pdf, bibfn)
-    time.sleep(random.randomint(10,20))
+    waittime = random.randint(10,20)
+    print "time to wait % s..." % waittime
+    time.sleep(waittime)
