@@ -2,6 +2,7 @@ import gscholar.gscholar as gs
 import os
 import fnmatch
 import time
+import random
 
 def enterfile(pdf, bibfile):
     if os.path.exists(pdf):
@@ -31,4 +32,4 @@ for pdf in pdfs:
     print "\n============================="
     print pdf
     enterfile(pdf, bibfn)
-    time.sleep(5)
+    time.sleep(random.randomint(10,20))
