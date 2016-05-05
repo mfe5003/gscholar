@@ -4,6 +4,8 @@ import fnmatch
 import time
 import random
 
+unsorteddir='/home/ebert/Dropbox/Papers-unsort/'
+
 def enterfile(pdf, bibfile):
     if os.path.exists(pdf):
         biblist = gs.pdflookup( pdf, all, gs.FORMAT_BIBTEX, None )
@@ -12,6 +14,7 @@ def enterfile(pdf, bibfile):
 
     if len(biblist) < 1:
         print "no results found"
+        os.renames(pdf, os.path.join(unsorteddir,os.path.basename(pdf)))
         return -2
 
     # move file and bib info
@@ -32,4 +35,7 @@ for pdf in pdfs:
     print "\n============================="
     print pdf
     enterfile(pdf, bibfn)
-    time.sleep(random.randomint(10,20))
+    wt=random.randint(60,120)
+    print "waiting % s..." % wt
+    time.sleep(wt)
+

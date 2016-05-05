@@ -154,8 +154,9 @@ def pdflookup(pdf, allresults, outformat, startpage=None):
     txt = convert_pdf_to_txt(pdf, startpage)
     # remove all non alphanumeric characters
     txt = re.sub("\W", " ", txt)
-    words = txt.strip().split()[:20]
+    words = txt.strip().split()[:20+random.randint(-5,5)]
     gsquery = " ".join(words)
+    print gsquery
     bibtexlist = query(gsquery, outformat, allresults)
     return bibtexlist
 
