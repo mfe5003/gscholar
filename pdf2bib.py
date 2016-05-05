@@ -38,4 +38,3 @@ for pdf in pdfs:
     wt=random.randint(60,120)
     print "waiting % s..." % wt
     time.sleep(wt)
-
